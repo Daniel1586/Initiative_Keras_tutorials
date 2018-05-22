@@ -49,20 +49,16 @@ networks that use attentional processes can efficiently search through this
 noise to find the relevant statements, improving performance substantially.
 This becomes especially obvious on QA2 and QA3, both far longer than QA1.
 """
+# Output after 40 epochs on CPU(i5-7500): ~0.2940
 
-
-from __future__ import print_function
-from functools import reduce
 import re
 import tarfile
-
 import numpy as np
-
-from keras.utils.data_utils import get_file
-from keras.layers.embeddings import Embedding
+from functools import reduce
 from keras import layers
 from keras.layers import recurrent
 from keras.models import Model
+from keras.utils.data_utils import get_file
 from keras.preprocessing.sequence import pad_sequences
 
 
@@ -135,6 +131,7 @@ def vectorize_stories(data, word_idx, story_maxlen, query_maxlen):
         xs.append(x)
         xqs.append(xq)
         ys.append(y)
+
     return pad_sequences(xs, maxlen=story_maxlen), pad_sequences(xqs, maxlen=query_maxlen), np.array(ys)
 
 

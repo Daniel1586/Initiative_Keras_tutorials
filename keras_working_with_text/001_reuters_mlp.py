@@ -3,6 +3,7 @@
 
 # Trains and evaluate a simple MLP on the Reuters newswire topic classification task.
 # 训练并评估一个简单的MLP(对路透社新闻主题分类)
+# Output after 5 epochs on CPU(i5-7500): ~0.7938
 
 import keras
 import numpy as np

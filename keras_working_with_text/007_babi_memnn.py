@@ -13,6 +13,7 @@ References:
 Reaches 98.6% accuracy on task 'single_supporting_fact_10k' after 120 epochs.
 Time per epoch: 3s on CPU (core i7).
 """
+# Output after 120 epochs on CPU(i5-7500): ~0.9680
 
 import re
 import tarfile

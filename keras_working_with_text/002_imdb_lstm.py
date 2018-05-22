@@ -4,6 +4,7 @@
 # Train an LSTM model on the IMDB sentiment classification task. The dataset is actually too small
 # for LSTM to be of any advantage compared to simpler, much faster methods such as TF-IDF + LogReg.
 # 利用LSTM模型对IMDB影评倾向分类
+# Output after 5 epochs on CPU(i5-7500): ~0.8199
 
 from keras.preprocessing import sequence
 from keras.models import Sequential

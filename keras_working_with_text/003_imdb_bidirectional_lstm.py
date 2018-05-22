@@ -3,6 +3,7 @@
 
 # Train a Bidirectional LSTM on the IMDB sentiment classification task.
 # 利用Bi-LSTM模型对IMDB影评倾向分类
+# Output after 5 epochs on CPU(i5-7500): ~0.8346
 
 import numpy as np
 from keras.preprocessing import sequence

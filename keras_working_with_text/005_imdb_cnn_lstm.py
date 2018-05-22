@@ -3,6 +3,7 @@
 
 # Train a recurrent convolutional network on the IMDB sentiment classification task.
 # 利用1D-CNN-LSTM模型对IMDB影评倾向分类
+# Output after 5 epochs on CPU(i5-7500): ~0.8309
 
 from keras.preprocessing import sequence
 from keras.models import Sequential

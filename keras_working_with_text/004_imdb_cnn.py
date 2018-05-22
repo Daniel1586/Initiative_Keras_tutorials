@@ -3,6 +3,7 @@
 
 # This example demonstrates the use of Convolution1D for text classification.
 # 利用1D-CNN模型对IMDB影评倾向分类
+# Output after 5 epochs on CPU(i5-7500): ~0.8742
 
 from keras.preprocessing import sequence
 from keras.models import Sequential
