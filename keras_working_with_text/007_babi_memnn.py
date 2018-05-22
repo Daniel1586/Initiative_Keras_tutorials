@@ -1,7 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-'''Trains a memory network on the bAbI dataset.
+"""
+Trains a memory network on the bAbI dataset.
 References:
 - Jason Weston, Antoine Bordes, Sumit Chopra, Tomas Mikolov, Alexander M. Rush,
   "Towards AI-Complete Question Answering: A Set of Prerequisite Toy Tasks",
@@ -11,42 +12,44 @@ References:
   http://arxiv.org/abs/1503.08895
 Reaches 98.6% accuracy on task 'single_supporting_fact_10k' after 120 epochs.
 Time per epoch: 3s on CPU (core i7).
-'''
-from __future__ import print_function
+"""
 
+import re
+import tarfile
+import numpy as np
+from functools import reduce
 from keras.models import Sequential, Model
 from keras.layers.embeddings import Embedding
 from keras.layers import Input, Activation, Dense, Permute, Dropout, add, dot, concatenate
 from keras.layers import LSTM
 from keras.utils.data_utils import get_file
 from keras.preprocessing.sequence import pad_sequences
-from functools import reduce
-import tarfile
-import numpy as np
-import re
 
 
+# 将句子按空格间隔划分为单词和标点符号
+# Return the tokens of a sentence including punctuation.
+# tokenize('Bob dropped the apple. Where is the apple?')
+# ['Bob', 'dropped', 'the', 'apple', '.', 'Where', 'is', 'the', 'apple', '?']
 def tokenize(sent):
-    '''Return the tokens of a sentence including punctuation.
-    >>> tokenize('Bob dropped the apple. Where is the apple?')
-    ['Bob', 'dropped', 'the', 'apple', '.', 'Where', 'is', 'the', 'apple', '?']
-    '''
     return [x.strip() for x in re.split('(\W+)?', sent) if x.strip()]
 
 
+# 数据集以对话集+问题+回答组成,问题答案后序号表示和前面哪2句话相关
+# Parse stories provided in the bAbi tasks format
+# If only_supporting is true, only the sentences that support the answer are kept.
 def parse_stories(lines, only_supporting=False):
-    '''Parse stories provided in the bAbi tasks format
-    If only_supporting is true, only the sentences
-    that support the answer are kept.
-    '''
     data = []
     story = []
     for line in lines:
         line = line.decode('utf-8').strip()
         nid, line = line.split(' ', 1)
         nid = int(nid)
+
+        # 场景对话第1句,清空story变量
         if nid == 1:
             story = []
+
+        # 场景问题句
         if '\t' in line:
             q, a, supporting = line.split('\t')
             q = tokenize(q)
@@ -66,31 +69,34 @@ def parse_stories(lines, only_supporting=False):
     return data
 
 
+# 按一定的格式获得数据集:每个set是一个完整的问题,含有2个list和1个str,前1个list是描述,后一个是问题,最后一个str是答案
+# Given a file name, read the file, retrieve the stories, and then convert the sentences into a single story.
+# If max_length is supplied, any stories longer than max_length tokens will be discarded.
 def get_stories(f, only_supporting=False, max_length=None):
-    '''Given a file name, read the file,
-    retrieve the stories,
-    and then convert the sentences into a single story.
-    If max_length is supplied,
-    any stories longer than max_length tokens will be discarded.
-    '''
     data = parse_stories(f.readlines(), only_supporting=only_supporting)
     flatten = lambda data: reduce(lambda x, y: x + y, data)
-    data = [(flatten(story), q, answer) for story, q, answer in data if not max_length or len(flatten(story)) < max_length]
+    data = [(flatten(story), q, answer) for story, q, answer in data
+            if not max_length or len(flatten(story)) < max_length]
     return data
 
 
+# 根据预处理过程中找到的最长对话/最长问题/最长答案,将所有的对话/问题/答案向量全部前置padding到一个等长的size
 def vectorize_stories(data):
     inputs, queries, answers = [], [], []
     for story, query, answer in data:
         inputs.append([word_idx[w] for w in story])
         queries.append([word_idx[w] for w in query])
         answers.append(word_idx[answer])
+
     return (pad_sequences(inputs, maxlen=story_maxlen),
             pad_sequences(queries, maxlen=query_maxlen),
             np.array(answers))
 
+
+print('========== 1.Loading data...')
 try:
-    path = get_file('babi_tasks_1-20_v1-2.tar.gz', origin='https://s3.amazonaws.com/text-datasets/babi_tasks_1-20_v1-2.tar.gz')
+    path = get_file('babi_tasks_1-20_v1-2.tar.gz',
+                    origin='https://s3.amazonaws.com/text-datasets/babi_tasks_1-20_v1-2.tar.gz')
 except:
     print('Error downloading dataset, please download it manually:\n'
           '$ wget http://www.thespermwhale.com/jaseweston/babi/tasks_1-20_v1-2.tar.gz\n'
@@ -107,7 +113,7 @@ challenges = {
 challenge_type = 'single_supporting_fact_10k'
 challenge = challenges[challenge_type]
 
-print('Extracting stories for the challenge:', challenge_type)
+print('----- Extracting stories for the challenge:', challenge_type)
 with tarfile.open(path) as tar:
     train_stories = get_stories(tar.extractfile(challenge.format('train')))
     test_stories = get_stories(tar.extractfile(challenge.format('test')))
@@ -122,37 +128,37 @@ vocab_size = len(vocab) + 1
 story_maxlen = max(map(len, (x for x, _, _ in train_stories + test_stories)))
 query_maxlen = max(map(len, (x for _, x, _ in train_stories + test_stories)))
 
-print('-')
+print('-----')
 print('Vocab size:', vocab_size, 'unique words')
 print('Story max length:', story_maxlen, 'words')
 print('Query max length:', query_maxlen, 'words')
 print('Number of training stories:', len(train_stories))
 print('Number of test stories:', len(test_stories))
-print('-')
+print('-----')
 print('Here\'s what a "story" tuple looks like (input, query, answer):')
 print(train_stories[0])
-print('-')
-print('Vectorizing the word sequences...')
+print('-----')
 
+print('========== 2.Vectorizing the word sequences...')
 word_idx = dict((c, i + 1) for i, c in enumerate(vocab))
 inputs_train, queries_train, answers_train = vectorize_stories(train_stories)
 inputs_test, queries_test, answers_test = vectorize_stories(test_stories)
 
-print('-')
+print('------')
 print('inputs: integer tensor of shape (samples, max_length)')
 print('inputs_train shape:', inputs_train.shape)
 print('inputs_test shape:', inputs_test.shape)
-print('-')
+print('------')
 print('queries: integer tensor of shape (samples, max_length)')
 print('queries_train shape:', queries_train.shape)
 print('queries_test shape:', queries_test.shape)
-print('-')
+print('------')
 print('answers: binary (1 or 0) tensor of shape (samples, vocab_size)')
 print('answers_train shape:', answers_train.shape)
 print('answers_test shape:', answers_test.shape)
-print('-')
-print('Compiling...')
+print('------')
 
+print('========== 3.Building model...')
 # placeholders
 input_sequence = Input((story_maxlen,))
 question = Input((query_maxlen,))
@@ -160,23 +166,19 @@ question = Input((query_maxlen,))
 # encoders
 # embed the input sequence into a sequence of vectors
 input_encoder_m = Sequential()
-input_encoder_m.add(Embedding(input_dim=vocab_size,
-                              output_dim=64))
+input_encoder_m.add(Embedding(input_dim=vocab_size, output_dim=64))
 input_encoder_m.add(Dropout(0.3))
 # output: (samples, story_maxlen, embedding_dim)
 
 # embed the input into a sequence of vectors of size query_maxlen
 input_encoder_c = Sequential()
-input_encoder_c.add(Embedding(input_dim=vocab_size,
-                              output_dim=query_maxlen))
+input_encoder_c.add(Embedding(input_dim=vocab_size, output_dim=query_maxlen))
 input_encoder_c.add(Dropout(0.3))
 # output: (samples, story_maxlen, query_maxlen)
 
 # embed the question into a sequence of vectors
 question_encoder = Sequential()
-question_encoder.add(Embedding(input_dim=vocab_size,
-                               output_dim=64,
-                               input_length=query_maxlen))
+question_encoder.add(Embedding(input_dim=vocab_size, output_dim=64, input_length=query_maxlen))
 question_encoder.add(Dropout(0.3))
 # output: (samples, query_maxlen, embedding_dim)
 
@@ -211,11 +213,9 @@ answer = Activation('softmax')(answer)
 
 # build the final model
 model = Model([input_sequence, question], answer)
-model.compile(optimizer='rmsprop', loss='sparse_categorical_crossentropy',
-              metrics=['accuracy'])
+model.compile(optimizer='rmsprop', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+model.summary()
 
 # train
-model.fit([inputs_train, queries_train], answers_train,
-          batch_size=32,
-          epochs=120,
+model.fit([inputs_train, queries_train], answers_train, batch_size=32, epochs=120,
           validation_data=([inputs_test, queries_test], answers_test))
