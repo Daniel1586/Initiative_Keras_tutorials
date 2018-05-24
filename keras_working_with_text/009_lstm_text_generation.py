@@ -62,10 +62,11 @@ model.add(Activation('softmax'))
 
 optimizer = RMSprop(lr=0.01)
 model.compile(loss='categorical_crossentropy', optimizer=optimizer)
+model.summary()
 
 
+# helper function to sample an index from a probability array
 def sample(preds, temperature=1.0):
-    # helper function to sample an index from a probability array
     preds = np.asarray(preds).astype('float64')
     preds = np.log(preds) / temperature
     exp_preds = np.exp(preds)
@@ -74,8 +75,8 @@ def sample(preds, temperature=1.0):
     return np.argmax(probas)
 
 
+# Function invoked at end of each epoch. Prints generated text.
 def on_epoch_end(epoch, logs):
-    # Function invoked at end of each epoch. Prints generated text.
     print()
     print('----- Generating text after Epoch: %d' % epoch)
 
@@ -105,9 +106,6 @@ def on_epoch_end(epoch, logs):
             sys.stdout.flush()
         print()
 
-print_callback = LambdaCallback(on_epoch_end=on_epoch_end)
 
-model.fit(x, y,
-          batch_size=128,
-          epochs=60,
-          callbacks=[print_callback])
+print_callback = LambdaCallback(on_epoch_end=on_epoch_end)
+model.fit(x, y, batch_size=128, epochs=60, callbacks=[print_callback])
