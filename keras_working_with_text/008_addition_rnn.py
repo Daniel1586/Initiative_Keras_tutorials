@@ -23,7 +23,7 @@ Four digits reversed:
 Five digits reversed:
 + One layer LSTM (128 HN), 550k training examples = 99% train/test accuracy in 30 epochs
 """
-# Output after 5 epochs on CPU(i5-7500): ~0.7938
+# Output after 100 epochs on CPU(i5-7500): ~0.9828
 
 import numpy as np
 from keras import layers
@@ -178,7 +178,7 @@ model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accur
 model.summary()
 
 # Train the model each generation and show predictions against the validation dataset.
-for iteration in range(1, 200):
+for iteration in range(1, 100):
     print()
     print('-' * 50)
     print('Iteration', iteration)
