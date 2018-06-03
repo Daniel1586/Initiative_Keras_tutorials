@@ -11,7 +11,7 @@ and 79% after 15 epochs, and 83% after 30 epochs.
 In my test, highest validation accuracy is 83.79% after 50 epochs.
 This is a fast Implement, just 20s/epoch with a gtx 1070 gpu.
 """
-# Output after 10 epochs on CPU(i5-7500): ~
+# Output after 10 epochs on CPU(i5-7500)/GPU(1050Ti): ~0.7257
 
 from keras import utils
 from keras.datasets import cifar10
