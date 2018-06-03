@@ -2,7 +2,8 @@
 # -*- coding: utf-8 -*-
 
 # 训练CNN-ResNet模型对CIFAR10数据集物体识别
-"""Trains a ResNet on the CIFAR10 dataset.
+"""
+Trains a ResNet on the CIFAR10 dataset.
 ResNet v1
 [a] Deep Residual Learning for Image Recognition
 https://arxiv.org/pdf/1512.03385.pdf
