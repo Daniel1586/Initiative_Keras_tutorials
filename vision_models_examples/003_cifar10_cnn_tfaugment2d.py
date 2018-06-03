@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-# 训练CNN模型对CIFAR10数据集物体识别
+# 训练CNN模型[自定义数据增强]对CIFAR10数据集物体识别
 """
 Train a simple deep CNN on the CIFAR10 small images dataset.
 Using Tensorflow internal augmentation APIs by replacing ImageGenerator with
