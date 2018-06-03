@@ -33,7 +33,7 @@ Number    | %Accuracy      | Performance    | %Accuracy     | Performance
 (Corner process and rotation precision by `ImageGenerator` and `AugmentLayer`
 are slightly different.)
 """
-# Output after 25 epochs on CPU(i5-7500): ~
+# Output after 25 epochs on CPU(i5-7500): ~0.7615
 
 import os
 import keras
@@ -43,7 +43,6 @@ from keras.models import Sequential
 from keras.layers import Dense, Dropout, Activation, Flatten
 from keras.layers import Conv2D, Lambda, MaxPooling2D
 from keras import backend as K
-
 
 if K.backend() != 'tensorflow':
     raise RuntimeError('This example can only run with the '
@@ -107,7 +106,7 @@ def augment_2d(inputs, rotation=0, horizontal_flip=False, vertical_flip=False):
 
 batch_size = 32
 num_classes = 10
-epochs = 100
+epochs = 25
 num_predictions = 20
 save_dir = '/tmp/saved_models'
 model_name = 'keras_cifar10_trained_model.h5'
@@ -116,8 +115,8 @@ model_name = 'keras_cifar10_trained_model.h5'
 # CIFAR10数据集: 训练集50000,测试集10000
 print('========== 1.Loading data...')
 (x_train, y_train), (x_test, y_test) = cifar10.load_data()
-print('x_train shape:', x_train.shape)
-print('x_test  shape:', x_test.shape)
+print('----- x_train shape:', x_train.shape)
+print('----- x_test  shape:', x_test.shape)
 
 # Convert class vectors to binary class matrices.
 # 对每条数据的类别标签(train/test)转换为类别数目的0/1值序列(one-hot)
@@ -166,13 +165,11 @@ model.fit(x_train, y_train, batch_size=batch_size, epochs=epochs,
           validation_data=(x_test, y_test), shuffle=True)
 
 # Save model and weights
-"""
 if not os.path.isdir(save_dir):
     os.makedirs(save_dir)
 model_path = os.path.join(save_dir, model_name)
 model.save(model_path)
 print('----- Saved trained model at %s ' % model_path)
-"""
 
 # Score trained model.
 scores = model.evaluate(x_test, y_test, verbose=1)
