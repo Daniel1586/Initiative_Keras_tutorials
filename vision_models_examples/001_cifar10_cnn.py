@@ -4,7 +4,7 @@
 # 训练CNN模型对CIFAR10数据集物体识别
 # Train a simple deep CNN on the CIFAR10 small images dataset.
 # It gets to 75% validation accuracy in 25 epochs, and 79% after 50 epochs.
-# Output after 25 epochs on CPU(i5-7500): ~
+# Output after 25 epochs on CPU(i5-7500)/GPU(1050Ti): ~0.7387
 
 import os
 import keras
