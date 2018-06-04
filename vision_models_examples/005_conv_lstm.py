@@ -18,7 +18,6 @@ import pylab as plt
 
 # We create a layer which take as input movies of shape (n_frames, width, height, channels)
 # and returns a movie of identical shape.
-
 seq = Sequential()
 seq.add(ConvLSTM2D(filters=40, kernel_size=(3, 3), input_shape=(None, 40, 40, 1),
                    padding='same', return_sequences=True))
@@ -101,19 +100,15 @@ seq.fit(noisy_movies[:1000], shifted_movies[:1000], batch_size=10,
 # feed it with the first 7 positions and then predict the new positions
 which = 1004
 track = noisy_movies[which][:7, ::, ::, ::]
-
 for j in range(16):
     new_pos = seq.predict(track[np.newaxis, ::, ::, ::, ::])
     new = new_pos[::, -1, ::, ::, ::]
     track = np.concatenate((track, new), axis=0)
 
-
-# And then compare the predictions
-# to the ground truth
+# And then compare the predictions to the ground truth
 track2 = noisy_movies[which][::, ::, ::, ::]
 for i in range(15):
     fig = plt.figure(figsize=(10, 5))
-
     ax = fig.add_subplot(121)
 
     if i >= 7:
@@ -122,7 +117,6 @@ for i in range(15):
         ax.text(1, 3, 'Initial trajectory', fontsize=20)
 
     toplot = track[i, ::, ::, 0]
-
     plt.imshow(toplot)
     ax = fig.add_subplot(122)
     plt.text(1, 3, 'Ground truth', fontsize=20)
@@ -130,6 +124,5 @@ for i in range(15):
     toplot = track2[i, ::, ::, 0]
     if i >= 2:
         toplot = shifted_movies[which][i - 1, ::, ::, 0]
-
     plt.imshow(toplot)
     plt.savefig('%i_animate.png' % (i + 1))
