@@ -1,2 +1,4 @@
 .idea
 *.pyc
+*.txt
+*.h5
